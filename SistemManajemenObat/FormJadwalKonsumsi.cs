@@ -31,7 +31,83 @@ namespace SistemManajemenObat
             dtpWaktuMinum.Format = DateTimePickerFormat.Time;
             dtpWaktuMinum.ShowUpDown = true;
 
+            dataGridView1.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dataGridView1.MultiSelect = false;
+            dataGridView1.ReadOnly = true;
+            dataGridView1.AllowUserToAddRows = false;
+            dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+
+            dataGridView1.CellClick += dataGridView1_CellClick;
+            btnLoad.Click += btnLoad_Click;
+            btnInsert.Click += btnInsert_Click;
+            btnUpdate.Click += btnUpdate_Click;
+            btnDelete.Click += btnDelete_Click;
         }
+        // Tambahkan method-method ini di bawah FormJadwalKonsumsi_Load
+        private void btnLoad_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (conn.State == ConnectionState.Closed) conn.Open();
+                dataGridView1.Rows.Clear();
+                dataGridView1.Columns.Clear();
+                dataGridView1.Columns.Add("id_jadwal", "ID Jadwal");
+                dataGridView1.Columns.Add("id_obat", "ID Obat");
+                dataGridView1.Columns.Add("waktu_minum", "Waktu Minum");
+                dataGridView1.Columns.Add("dosis", "Dosis");
+
+                string query = "SELECT * FROM JadwalKonsumsi";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    dataGridView1.Rows.Add(
+                        reader["id_jadwal"].ToString(),
+                        reader["id_obat"].ToString(),
+                        reader["waktu_minum"].ToString(),
+                        reader["dosis"].ToString()
+                    );
+                }
+                reader.Close();
+            }
+            catch (Exception ex) { MessageBox.Show("Gagal menampilkan data: " + ex.Message); }
+        }
+
+        private void btnInsert_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (conn.State == ConnectionState.Closed) conn.Open();
+                string query = @"INSERT INTO JadwalKonsumsi (id_obat, waktu_minum, dosis) VALUES (@id_obat, @waktu_minum, @dosis)";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@id_obat", txtIdObat.Text);
+                cmd.Parameters.AddWithValue("@waktu_minum", dtpWaktuMinum.Value.TimeOfDay);
+                cmd.Parameters.AddWithValue("@dosis", txtDosis.Text);
+                if (cmd.ExecuteNonQuery() > 0) { btnLoad.PerformClick(); }
+            }
+            catch (Exception ex) { MessageBox.Show(ex.Message); }
+        }
+
+        private void btnUpdate_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (conn.State == ConnectionState.Closed) conn.Open();
+                string query = @"UPDATE JadwalKonsumsi SET id_obat=@id_obat, waktu_minum=@waktu_minum, dosis=@dosis WHERE id_jadwal=@id_jadwal";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@id_jadwal", txtIdJadwal.Text);
+                cmd.Parameters.AddWithValue("@id_obat", txtIdObat.Text);
+                cmd.Parameters.AddWithValue("@waktu_minum", dtpWaktuMinum.Value.TimeOfDay);
+                cmd.Parameters.AddWithValue("@dosis", txtDosis.Text);
+                if (cmd.ExecuteNonQuery() > 0) { btnLoad.PerformClick(); }
+            }
+            catch (Exception ex) { MessageBox.Show(ex.Message); }
+        }
+
+       
+        
+
+
 
     }
 }
