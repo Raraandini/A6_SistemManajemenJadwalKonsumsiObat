@@ -37,7 +37,7 @@ namespace SistemManajemenObat
             dataGridView1.AllowUserToAddRows = false;
             dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 
-            
+            dataGridView1.CellClick += dataGridView1_CellClick;
             btnLoad.Click += btnLoad_Click;
             btnInsert.Click += btnInsert_Click;
             btnUpdate.Click += btnUpdate_Click;
@@ -117,9 +117,19 @@ namespace SistemManajemenObat
             catch (Exception ex) { MessageBox.Show(ex.Message); }
         }
 
-        
-
-
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0)
+            {
+                DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
+                txtIdJadwal.Text = row.Cells["id_jadwal"].Value?.ToString();
+                txtIdObat.Text = row.Cells["id_obat"].Value?.ToString();
+                string waktuM = row.Cells["waktu_minum"].Value?.ToString();
+                if (TimeSpan.TryParse(waktuM, out TimeSpan ts))
+                    dtpWaktuMinum.Value = DateTime.Today.Add(ts);
+                txtDosis.Text = row.Cells["dosis"].Value?.ToString();
+            }
+        }
 
     }
 }
