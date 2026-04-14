@@ -37,7 +37,7 @@ namespace SistemManajemenObat
             dataGridView1.AllowUserToAddRows = false;
             dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 
-            dataGridView1.CellClick += dataGridView1_CellClick;
+            
             btnLoad.Click += btnLoad_Click;
             btnInsert.Click += btnInsert_Click;
             btnUpdate.Click += btnUpdate_Click;
@@ -104,7 +104,19 @@ namespace SistemManajemenObat
             catch (Exception ex) { MessageBox.Show(ex.Message); }
         }
 
-       
+        private void btnDelete_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (conn.State == ConnectionState.Closed) conn.Open();
+                string query = "DELETE FROM JadwalKonsumsi WHERE id_jadwal=@id_jadwal";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@id_jadwal", txtIdJadwal.Text);
+                if (cmd.ExecuteNonQuery() > 0) { btnLoad.PerformClick(); }
+            }
+            catch (Exception ex) { MessageBox.Show(ex.Message); }
+        }
+
         
 
 
