@@ -69,6 +69,74 @@ namespace SistemManajemenObat
             txtIdRiwayat.Focus();
         }
 
-      
+        private void btnLoad_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (conn.State == ConnectionState.Closed)
+                    conn.Open();
+
+                dataGridView1.Rows.Clear();
+                dataGridView1.Columns.Clear();
+
+                dataGridView1.Columns.Add("id_riwayat", "ID Riwayat");
+                dataGridView1.Columns.Add("id_obat", "ID Obat");
+                dataGridView1.Columns.Add("waktu_konsumsi", "Waktu Konsumsi");
+                dataGridView1.Columns.Add("status", "Status");
+
+                string query = "SELECT * FROM RiwayatKonsumsi";
+
+                SqlCommand cmd = new SqlCommand(query, conn);
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    dataGridView1.Rows.Add(
+                        reader["id_riwayat"].ToString(),
+                        reader["id_obat"].ToString(),
+                        reader["waktu_konsumsi"].ToString(),
+                        reader["status"].ToString()
+                    );
+                }
+
+                reader.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal menampilkan data: " + ex.Message);
+            }
+        }
+
+        private void btnInsert_Click(object sender, EventArgs e)
+        {
+           
+        }
+
+        private void btnUpdate_Click(object sender, EventArgs e)
+        {
+           
+        }
+
+        private void btnDelete_Click(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0)
+            {
+                DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
+
+                txtIdRiwayat.Text = row.Cells["id_riwayat"].Value?.ToString();
+                txtIdObat.Text = row.Cells["id_obat"].Value?.ToString();
+
+                string waktuK = row.Cells["waktu_konsumsi"].Value?.ToString();
+                if (TimeSpan.TryParse(waktuK, out TimeSpan ts))
+                    dtpWaktuKonsumsi.Value = DateTime.Today.Add(ts);
+
+                txtStatus.Text = row.Cells["status"].Value?.ToString();
+            }
+        }
     }
 }
