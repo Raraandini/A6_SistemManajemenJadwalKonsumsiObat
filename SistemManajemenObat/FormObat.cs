@@ -153,6 +153,144 @@ namespace SistemManajemenObat
             }
         }
 
-        
+        private void btnUpdate_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (conn.State == ConnectionState.Closed)
+                    conn.Open();
+
+                string query = @"UPDATE Obat
+                                 SET id_user = @id_user,
+                                     nama_obat = @nama_obat,
+                                     jumlah_stok = @jumlah_stok,
+                                     batas_minimum_stok = @batas_minimum_stok
+                                 WHERE id_obat = @id_obat";
+
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@id_obat", txtIdObat.Text);
+                cmd.Parameters.AddWithValue("@id_user", txtIdUser.Text);
+                cmd.Parameters.AddWithValue("@nama_obat", txtNamaObat.Text);
+                cmd.Parameters.AddWithValue("@jumlah_stok", txtJumlahStok.Text);
+                cmd.Parameters.AddWithValue("@batas_minimum_stok", txtBatasMinimumStok.Text);
+
+                int result = cmd.ExecuteNonQuery();
+
+                if (result > 0)
+                {
+                    MessageBox.Show("Data berhasil diupdate");
+                    ClearForm();
+                    btnLoad.PerformClick();
+                }
+                else
+                {
+                    MessageBox.Show("Data tidak ditemukan");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Terjadi kesalahan: " + ex.Message);
+            }
+        }
+
+        private void btnDelete_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (conn.State == ConnectionState.Closed)
+                    conn.Open();
+
+                DialogResult resultConfirm = MessageBox.Show(
+                    "Yakin ingin menghapus data?",
+                    "Konfirmasi",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question
+                );
+
+                if (resultConfirm == DialogResult.Yes)
+                {
+                    string query = "DELETE FROM Obat WHERE id_obat = @id_obat";
+
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@id_obat", txtIdObat.Text);
+
+                    int result = cmd.ExecuteNonQuery();
+
+                    if (result > 0)
+                    {
+                        MessageBox.Show("Data berhasil dihapus");
+                        ClearForm();
+                        btnLoad.PerformClick();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Data tidak ditemukan");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Terjadi kesalahan: " + ex.Message);
+            }
+        }
+
+        private void btnSearch_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (conn.State == ConnectionState.Closed)
+                    conn.Open();
+
+                string keyword = txtSearch.Text.Trim();
+
+                dataGridView1.Rows.Clear();
+                dataGridView1.Columns.Clear();
+
+                dataGridView1.Columns.Add("id_obat", "ID Obat");
+                dataGridView1.Columns.Add("id_user", "ID User");
+                dataGridView1.Columns.Add("nama_obat", "Nama Obat");
+                dataGridView1.Columns.Add("jumlah_stok", "Jumlah Stok");
+                dataGridView1.Columns.Add("batas_minimum_stok", "Batas Min Stok");
+
+                string query = "SELECT * FROM Obat WHERE nama_obat LIKE @keyword";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@keyword", "%" + keyword + "%");
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    dataGridView1.Rows.Add(
+                        reader["id_obat"].ToString(),
+                        reader["id_user"].ToString(),
+                        reader["nama_obat"].ToString(),
+                        reader["jumlah_stok"].ToString(),
+                        reader["batas_minimum_stok"].ToString()
+                    );
+                }
+
+                reader.Close();
+
+                if (dataGridView1.Rows.Count == 0)
+                    MessageBox.Show("Tidak ditemukan obat dengan kata kunci: \"" + keyword + "\"", "Pencarian", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal mencari data: " + ex.Message);
+            }
+        }
+
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0)
+            {
+                DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
+
+                txtIdObat.Text = row.Cells["id_obat"].Value?.ToString();
+                txtIdUser.Text = row.Cells["id_user"].Value?.ToString();
+                txtNamaObat.Text = row.Cells["nama_obat"].Value?.ToString();
+                txtJumlahStok.Text = row.Cells["jumlah_stok"].Value?.ToString();
+                txtBatasMinimumStok.Text = row.Cells["batas_minimum_stok"].Value?.ToString();
+            }
+        }
     }
 }
