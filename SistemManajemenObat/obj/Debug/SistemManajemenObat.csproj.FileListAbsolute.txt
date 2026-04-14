@@ -1,0 +1,9 @@
+C:\SEMESTER 4\pabd\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\bin\Debug\SistemManajemenObat.exe.config
+C:\SEMESTER 4\pabd\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\bin\Debug\SistemManajemenObat.exe
+C:\SEMESTER 4\pabd\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\bin\Debug\SistemManajemenObat.pdb
+C:\SEMESTER 4\pabd\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\obj\Debug\SistemManajemenObat.csproj.AssemblyReference.cache
+C:\SEMESTER 4\pabd\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\obj\Debug\SistemManajemenObat.Properties.Resources.resources
+C:\SEMESTER 4\pabd\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\obj\Debug\SistemManajemenObat.csproj.GenerateResource.cache
+C:\SEMESTER 4\pabd\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\obj\Debug\SistemManajemenObat.csproj.CoreCompileInputs.cache
+C:\SEMESTER 4\pabd\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\obj\Debug\SistemManajemenObat.exe
+C:\SEMESTER 4\pabd\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\obj\Debug\SistemManajemenObat.pdb
