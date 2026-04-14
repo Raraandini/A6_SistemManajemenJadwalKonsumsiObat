@@ -109,6 +109,50 @@ namespace SistemManajemenObat
             }
         }
 
+        private void btnInsert_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (conn.State == ConnectionState.Closed)
+                    conn.Open();
+
+                if (string.IsNullOrEmpty(txtNamaObat.Text))
+                {
+                    MessageBox.Show("Nama Obat harus diisi");
+                    txtNamaObat.Focus();
+                    return;
+                }
+
+                string query = @"INSERT INTO Obat 
+                                (id_user, nama_obat, jumlah_stok, batas_minimum_stok)
+                                VALUES 
+                                (@id_user, @nama_obat, @jumlah_stok, @batas_minimum_stok)";
+
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@id_user", txtIdUser.Text);
+                cmd.Parameters.AddWithValue("@nama_obat", txtNamaObat.Text);
+                cmd.Parameters.AddWithValue("@jumlah_stok", txtJumlahStok.Text);
+                cmd.Parameters.AddWithValue("@batas_minimum_stok", txtBatasMinimumStok.Text);
+
+                int result = cmd.ExecuteNonQuery();
+
+                if (result > 0)
+                {
+                    MessageBox.Show("Data obat berhasil ditambahkan");
+                    ClearForm();
+                    btnLoad.PerformClick();
+                }
+                else
+                {
+                    MessageBox.Show("Data gagal ditambahkan");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Terjadi kesalahan: " + ex.Message);
+            }
+        }
+
         
     }
 }
