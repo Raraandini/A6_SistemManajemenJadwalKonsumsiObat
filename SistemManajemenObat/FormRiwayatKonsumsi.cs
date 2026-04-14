@@ -114,7 +114,40 @@ namespace SistemManajemenObat
 
         private void btnUpdate_Click(object sender, EventArgs e)
         {
-           
+            try
+            {
+                if (conn.State == ConnectionState.Closed)
+                    conn.Open();
+
+                string query = @"UPDATE RiwayatKonsumsi
+                                 SET id_obat = @id_obat,
+                                     waktu_konsumsi = @waktu_konsumsi,
+                                     status = @status
+                                 WHERE id_riwayat = @id_riwayat";
+
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@id_riwayat", txtIdRiwayat.Text);
+                cmd.Parameters.AddWithValue("@id_obat", txtIdObat.Text);
+                cmd.Parameters.AddWithValue("@waktu_konsumsi", dtpWaktuKonsumsi.Value.TimeOfDay);
+                cmd.Parameters.AddWithValue("@status", txtStatus.Text);
+
+                int result = cmd.ExecuteNonQuery();
+
+                if (result > 0)
+                {
+                    MessageBox.Show("Data berhasil diupdate");
+                    ClearForm();
+                    btnLoad.PerformClick();
+                }
+                else
+                {
+                    MessageBox.Show("Data tidak ditemukan");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Terjadi kesalahan: " + ex.Message);
+            }
         }
 
         private void btnDelete_Click(object sender, EventArgs e)
