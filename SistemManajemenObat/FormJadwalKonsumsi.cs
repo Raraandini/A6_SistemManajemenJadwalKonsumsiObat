@@ -23,6 +23,15 @@ namespace SistemManajemenObat
             conn = new SqlConnection(connectionString);
         }
 
-        
+        private void FormJadwalKonsumsi_Load(object sender, EventArgs e)
+        {
+            txtIdJadwal.ReadOnly = true;
+            txtIdJadwal.BackColor = Color.LightGray;
+
+            dtpWaktuMinum.Format = DateTimePickerFormat.Time;
+            dtpWaktuMinum.ShowUpDown = true;
+
+        }
+
     }
 }
