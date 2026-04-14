@@ -48,9 +48,55 @@ namespace SistemManajemenObat
             ConnectDatabase();
         }
 
+        private void btnLogin_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(txtUsername.Text) || string.IsNullOrEmpty(txtPassword.Text))
+            {
+                MessageBox.Show("Username dan Password harus diisi!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+                    string query = "SELECT id_user, nama FROM [User] WHERE username = @usr AND password = @pwd";
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@usr", txtUsername.Text);
+                    cmd.Parameters.AddWithValue("@pwd", txtPassword.Text);
 
+                    SqlDataReader reader = cmd.ExecuteReader();
 
+                    if (reader.HasRows)
+                    {
+                        reader.Read();
+                        string nama = reader["nama"].ToString();
+                        MessageBox.Show($"Selamat Datang, {nama}!", "Login Berhasil");
+
+                        Form1 dashboard = new Form1();
+                        this.Hide();
+                        dashboard.Show();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Username atau Password salah!", "Login Gagal", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Terjadi masalah sistem: " + ex.Message, "Error");
+            }
+        }
+
+        private void btnRegister_Click(object sender, EventArgs e)
+        {
+            FormUser frmRegister = new FormUser();
+            this.Hide();
+            frmRegister.ShowDialog();
+            this.Show();
+        }
 
     }
 }
