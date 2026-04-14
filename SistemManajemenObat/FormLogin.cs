@@ -27,9 +27,30 @@ namespace SistemManajemenObat
             btnLogin.MouseLeave += (s, ev) => btnLogin.BackColor = Color.FromArgb(167, 199, 231);
         }
 
-        
+        private void ConnectDatabase()
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+                    MessageBox.Show("Koneksi berhasil terhubung dengan Database!", "Status Koneksi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Koneksi gagal: " + ex.Message, "Status Koneksi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
 
-       
-        
+        private void btnConnect_Click(object sender, EventArgs e)
+        {
+            ConnectDatabase();
+        }
+
+
+
+
+
     }
 }
