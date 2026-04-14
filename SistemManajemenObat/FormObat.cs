@@ -44,5 +44,31 @@ namespace SistemManajemenObat
             txtSearch.KeyDown += (s, ev) => { if (ev.KeyCode == Keys.Enter) btnSearch.PerformClick(); };
         }
 
+        private void ConnectDatabase()
+        {
+            try
+            {
+                if (conn.State == ConnectionState.Closed)
+                    conn.Open();
+
+                MessageBox.Show("Koneksi berhasil");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Koneksi gagal: " + ex.Message);
+            }
+        }
+
+        private void ClearForm()
+        {
+            txtIdObat.Clear();
+            txtIdUser.Clear();
+            txtNamaObat.Clear();
+            txtJumlahStok.Clear();
+            txtBatasMinimumStok.Clear();
+            txtIdObat.Focus();
+        }
+
+       
     }
 }
