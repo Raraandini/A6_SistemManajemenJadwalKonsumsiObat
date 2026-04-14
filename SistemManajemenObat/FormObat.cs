@@ -69,6 +69,46 @@ namespace SistemManajemenObat
             txtIdObat.Focus();
         }
 
-       
+        private void btnLoad_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (conn.State == ConnectionState.Closed)
+                    conn.Open();
+
+                dataGridView1.Rows.Clear();
+                dataGridView1.Columns.Clear();
+
+                dataGridView1.Columns.Add("id_obat", "ID Obat");
+                dataGridView1.Columns.Add("id_user", "ID User");
+                dataGridView1.Columns.Add("nama_obat", "Nama Obat");
+                dataGridView1.Columns.Add("jumlah_stok", "Jumlah Stok");
+                dataGridView1.Columns.Add("batas_minimum_stok", "Batas Min Stok");
+
+                string query = "SELECT * FROM Obat";
+
+                SqlCommand cmd = new SqlCommand(query, conn);
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    dataGridView1.Rows.Add(
+                        reader["id_obat"].ToString(),
+                        reader["id_user"].ToString(),
+                        reader["nama_obat"].ToString(),
+                        reader["jumlah_stok"].ToString(),
+                        reader["batas_minimum_stok"].ToString()
+                    );
+                }
+
+                reader.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal menampilkan data: " + ex.Message);
+            }
+        }
+
+        
     }
 }
