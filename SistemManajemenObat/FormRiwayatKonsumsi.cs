@@ -109,7 +109,52 @@ namespace SistemManajemenObat
 
         private void btnInsert_Click(object sender, EventArgs e)
         {
-           
+            try
+            {
+                if (conn.State == ConnectionState.Closed)
+                    conn.Open();
+
+                if (string.IsNullOrEmpty(txtIdObat.Text))
+                {
+                    MessageBox.Show("ID Obat harus diisi");
+                    txtIdObat.Focus();
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(txtStatus.Text))
+                {
+                    MessageBox.Show("Status harus diisi");
+                    txtStatus.Focus();
+                    return;
+                }
+
+                string query = @"INSERT INTO RiwayatKonsumsi 
+                                (id_obat, waktu_konsumsi, status)
+                                VALUES 
+                                (@id_obat, @waktu_konsumsi, @status)";
+
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@id_obat", txtIdObat.Text);
+                cmd.Parameters.AddWithValue("@waktu_konsumsi", dtpWaktuKonsumsi.Value.TimeOfDay);
+                cmd.Parameters.AddWithValue("@status", txtStatus.Text);
+
+                int result = cmd.ExecuteNonQuery();
+
+                if (result > 0)
+                {
+                    MessageBox.Show("Data riwayat berhasil ditambahkan");
+                    ClearForm();
+                    btnLoad.PerformClick();
+                }
+                else
+                {
+                    MessageBox.Show("Data gagal ditambahkan");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Terjadi kesalahan: " + ex.Message);
+            }
         }
 
         private void btnUpdate_Click(object sender, EventArgs e)
