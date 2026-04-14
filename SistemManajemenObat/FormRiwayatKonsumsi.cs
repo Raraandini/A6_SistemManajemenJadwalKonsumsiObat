@@ -23,6 +23,28 @@ namespace SistemManajemenObat
             conn = new SqlConnection(connectionString);
         }
 
+        private void FormRiwayatKonsumsi_Load(object sender, EventArgs e)
+        {
+            txtIdRiwayat.ReadOnly = true;
+            txtIdRiwayat.BackColor = Color.LightGray;
+
+            dtpWaktuKonsumsi.Format = DateTimePickerFormat.Time;
+            dtpWaktuKonsumsi.ShowUpDown = true;
+
+            dataGridView1.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dataGridView1.MultiSelect = false;
+            dataGridView1.ReadOnly = true;
+            dataGridView1.AllowUserToAddRows = false;
+            dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+
+            dataGridView1.CellClick += dataGridView1_CellClick;
+
+            btnLoad.Click += btnLoad_Click;
+            btnInsert.Click += btnInsert_Click;
+            btnUpdate.Click += btnUpdate_Click;
+            btnDelete.Click += btnDelete_Click;
+        }
+
        
     }
 }
