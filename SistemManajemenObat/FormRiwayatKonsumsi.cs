@@ -1,11 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data.SqlClient;
 using System.Windows.Forms;
 
@@ -13,243 +7,67 @@ namespace SistemManajemenObat
 {
     public partial class FormRiwayatKonsumsi : Form
     {
-        private readonly SqlConnection conn;
-        private readonly string connectionString =
-            "Data Source=DESKTOP-8U71E72\\RARA;Initial Catalog=DBSistemManajemenObat;Integrated Security=True";
+        private string connStr =
+            "Data Source=LAPTOP-Q1UQHI44\\MEILANULFIA;Initial Catalog=DBSistemManajemenObat;Integrated Security=True";
 
         public FormRiwayatKonsumsi()
         {
             InitializeComponent();
-            conn = new SqlConnection(connectionString);
         }
 
         private void FormRiwayatKonsumsi_Load(object sender, EventArgs e)
         {
-            txtIdRiwayat.ReadOnly = true;
-            txtIdRiwayat.BackColor = Color.LightGray;
-
-            dtpWaktuKonsumsi.Format = DateTimePickerFormat.Time;
-            dtpWaktuKonsumsi.ShowUpDown = true;
-
-            dataGridView1.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dataGridView1.MultiSelect = false;
-            dataGridView1.ReadOnly = true;
+            dataGridView1.ReadOnly           = true;
             dataGridView1.AllowUserToAddRows = false;
-            dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-
-            dataGridView1.CellClick += dataGridView1_CellClick;
-
-            btnLoad.Click += btnLoad_Click;
-            btnInsert.Click += btnInsert_Click;
-            btnUpdate.Click += btnUpdate_Click;
-            btnDelete.Click += btnDelete_Click;
+            dataGridView1.SelectionMode      = DataGridViewSelectionMode.FullRowSelect;
+            dataGridView1.RowTemplate.Height = 28;
+            dataGridView1.BackgroundColor    = System.Drawing.Color.White;
+            dataGridView1.BorderStyle        = System.Windows.Forms.BorderStyle.None;
+            dataGridView1.ColumnHeadersDefaultCellStyle.BackColor =
+                System.Drawing.Color.FromArgb(167, 199, 231);
+            dataGridView1.ColumnHeadersDefaultCellStyle.ForeColor =
+                System.Drawing.Color.FromArgb(44, 62, 80);
+            dataGridView1.ColumnHeadersDefaultCellStyle.Font =
+                new System.Drawing.Font("Segoe UI Semibold", 10F, System.Drawing.FontStyle.Bold);
+            dataGridView1.EnableHeadersVisualStyles = false;
+            LoadData();
         }
 
-        private void ConnectDatabase()
+        private void LoadData()
         {
             try
             {
-                if (conn.State == ConnectionState.Closed)
+                using (SqlConnection conn = new SqlConnection(connStr))
+                {
                     conn.Open();
+                    string query = @"
+                        SELECT o.nama_obat,
+                               r.waktu_konsumsi,
+                               r.status_konsumsi
+                        FROM RiwayatKonsumsi r
+                        INNER JOIN Obat o ON r.id_obat = o.id_obat
+                        ORDER BY r.waktu_konsumsi DESC";
 
-                MessageBox.Show("Koneksi berhasil");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Koneksi gagal: " + ex.Message);
-            }
-        }
+                    SqlDataAdapter da = new SqlDataAdapter(query, conn);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    dataGridView1.DataSource = dt;
 
-        private void ClearForm()
-        {
-            txtIdRiwayat.Clear();
-            txtIdObat.Clear();
-            dtpWaktuKonsumsi.Value = DateTime.Now;
-            txtStatus.Clear();
-            txtIdRiwayat.Focus();
-        }
+                    dataGridView1.Columns["nama_obat"].HeaderText       = "Nama Obat";
+                    dataGridView1.Columns["waktu_konsumsi"].HeaderText  = "Waktu Konsumsi";
+                    dataGridView1.Columns["status_konsumsi"].HeaderText = "Status";
 
-        private void btnLoad_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                if (conn.State == ConnectionState.Closed)
-                    conn.Open();
-
-                dataGridView1.Rows.Clear();
-                dataGridView1.Columns.Clear();
-
-                dataGridView1.Columns.Add("id_riwayat", "ID Riwayat");
-                dataGridView1.Columns.Add("id_obat", "ID Obat");
-                dataGridView1.Columns.Add("waktu_konsumsi", "Waktu Konsumsi");
-                dataGridView1.Columns.Add("status", "Status");
-
-                string query = "SELECT * FROM RiwayatKonsumsi";
-
-                SqlCommand cmd = new SqlCommand(query, conn);
-                SqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    dataGridView1.Rows.Add(
-                        reader["id_riwayat"].ToString(),
-                        reader["id_obat"].ToString(),
-                        reader["waktu_konsumsi"].ToString(),
-                        reader["status"].ToString()
-                    );
-                }
-
-                reader.Close();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Gagal menampilkan data: " + ex.Message);
-            }
-        }
-
-        private void btnInsert_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                if (conn.State == ConnectionState.Closed)
-                    conn.Open();
-
-                if (string.IsNullOrEmpty(txtIdObat.Text))
-                {
-                    MessageBox.Show("ID Obat harus diisi");
-                    txtIdObat.Focus();
-                    return;
-                }
-
-                if (string.IsNullOrEmpty(txtStatus.Text))
-                {
-                    MessageBox.Show("Status harus diisi");
-                    txtStatus.Focus();
-                    return;
-                }
-
-                string query = @"INSERT INTO RiwayatKonsumsi 
-                                (id_obat, waktu_konsumsi, status)
-                                VALUES 
-                                (@id_obat, @waktu_konsumsi, @status)";
-
-                SqlCommand cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@id_obat", txtIdObat.Text);
-                cmd.Parameters.AddWithValue("@waktu_konsumsi", dtpWaktuKonsumsi.Value.TimeOfDay);
-                cmd.Parameters.AddWithValue("@status", txtStatus.Text);
-
-                int result = cmd.ExecuteNonQuery();
-
-                if (result > 0)
-                {
-                    MessageBox.Show("Data riwayat berhasil ditambahkan");
-                    ClearForm();
-                    btnLoad.PerformClick();
-                }
-                else
-                {
-                    MessageBox.Show("Data gagal ditambahkan");
+                    dataGridView1.Columns["nama_obat"].Width       = 220;
+                    dataGridView1.Columns["waktu_konsumsi"].Width  = 220;
+                    dataGridView1.Columns["status_konsumsi"].Width = 180;
+                    dataGridView1.AutoSizeColumnsMode =
+                        DataGridViewAutoSizeColumnsMode.None;
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Terjadi kesalahan: " + ex.Message);
-            }
-        }
-
-        private void btnUpdate_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                if (conn.State == ConnectionState.Closed)
-                    conn.Open();
-
-                string query = @"UPDATE RiwayatKonsumsi
-                                 SET id_obat = @id_obat,
-                                     waktu_konsumsi = @waktu_konsumsi,
-                                     status = @status
-                                 WHERE id_riwayat = @id_riwayat";
-
-                SqlCommand cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@id_riwayat", txtIdRiwayat.Text);
-                cmd.Parameters.AddWithValue("@id_obat", txtIdObat.Text);
-                cmd.Parameters.AddWithValue("@waktu_konsumsi", dtpWaktuKonsumsi.Value.TimeOfDay);
-                cmd.Parameters.AddWithValue("@status", txtStatus.Text);
-
-                int result = cmd.ExecuteNonQuery();
-
-                if (result > 0)
-                {
-                    MessageBox.Show("Data berhasil diupdate");
-                    ClearForm();
-                    btnLoad.PerformClick();
-                }
-                else
-                {
-                    MessageBox.Show("Data tidak ditemukan");
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Terjadi kesalahan: " + ex.Message);
-            }
-        }
-
-        private void btnDelete_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                if (conn.State == ConnectionState.Closed)
-                    conn.Open();
-
-                DialogResult resultConfirm = MessageBox.Show(
-                    "Yakin ingin menghapus data?",
-                    "Konfirmasi",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question
-                );
-
-                if (resultConfirm == DialogResult.Yes)
-                {
-                    string query = "DELETE FROM RiwayatKonsumsi WHERE id_riwayat = @id_riwayat";
-
-                    SqlCommand cmd = new SqlCommand(query, conn);
-                    cmd.Parameters.AddWithValue("@id_riwayat", txtIdRiwayat.Text);
-
-                    int result = cmd.ExecuteNonQuery();
-
-                    if (result > 0)
-                    {
-                        MessageBox.Show("Data berhasil dihapus");
-                        ClearForm();
-                        btnLoad.PerformClick();
-                    }
-                    else
-                    {
-                        MessageBox.Show("Data tidak ditemukan");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Terjadi kesalahan: " + ex.Message);
-            }
-        }
-
-        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex >= 0)
-            {
-                DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
-
-                txtIdRiwayat.Text = row.Cells["id_riwayat"].Value?.ToString();
-                txtIdObat.Text = row.Cells["id_obat"].Value?.ToString();
-
-                string waktuK = row.Cells["waktu_konsumsi"].Value?.ToString();
-                if (TimeSpan.TryParse(waktuK, out TimeSpan ts))
-                    dtpWaktuKonsumsi.Value = DateTime.Today.Add(ts);
-
-                txtStatus.Text = row.Cells["status"].Value?.ToString();
+                MessageBox.Show("Gagal memuat riwayat: " + ex.Message,
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

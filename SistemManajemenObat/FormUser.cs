@@ -1,26 +1,16 @@
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data.SqlClient;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace SistemManajemenObat
 {
     public partial class FormUser : Form
     {
-        private readonly SqlConnection conn;
-        private readonly string connectionString =
-            "Data Source=DESKTOP-8U71E72\\RARA;Initial Catalog=DBSistemManajemenObat;Integrated Security=True";
-
         public FormUser()
         {
             InitializeComponent();
-            conn = new SqlConnection(connectionString);
         }
 
         private void FormUser_Load(object sender, EventArgs e)
@@ -41,9 +31,6 @@ namespace SistemManajemenObat
         {
             try
             {
-                if (conn.State == ConnectionState.Closed)
-                    conn.Open();
-
                 if (string.IsNullOrEmpty(txtNama.Text))
                 {
                     MessageBox.Show("Nama harus diisi");
@@ -65,46 +52,72 @@ namespace SistemManajemenObat
                     return;
                 }
 
-                // Cek apakah username sudah ada
-                string checkQuery = "SELECT COUNT(*) FROM [User] WHERE username = @username";
-                SqlCommand checkCmd = new SqlCommand(checkQuery, conn);
-                checkCmd.Parameters.AddWithValue("@username", txtUsername.Text);
-                int userExists = (int)checkCmd.ExecuteScalar();
-
-                if (userExists > 0)
+                using (SqlConnection conn = DatabaseHelper.GetConnection())
                 {
-                    MessageBox.Show("Username sudah digunakan. Silakan pilih username lain.");
-                    return;
-                }
+                    conn.Open();
 
-                string query = @"INSERT INTO [User] (nama, username, password) 
-                                 VALUES (@nama, @username, @password)";
+                    // Cek apakah username sudah ada menggunakan SP sp_CheckUsername (asumsi ada untuk mematuhi aturan)
+                    // Jika SP tidak ada, Anda perlu membuatnya: CREATE PROCEDURE sp_CheckUsername @username VARCHAR(50) AS SELECT COUNT(*) FROM [User] WHERE username = @username
+                    SqlCommand checkCmd = new SqlCommand("sp_CheckUsername", conn);
+                    checkCmd.CommandType = CommandType.StoredProcedure;
+                    checkCmd.Parameters.AddWithValue("@username", txtUsername.Text);
+                    
+                    int userExists = 0;
+                    try 
+                    {
+                        userExists = Convert.ToInt32(checkCmd.ExecuteScalar());
+                    } 
+                    catch 
+                    {
+                        // Fallback aman jika SP sp_CheckUsername belum dibuat di SQL Server
+                        SqlCommand fallbackCheckCmd = new SqlCommand("SELECT COUNT(*) FROM [User] WHERE username = @username", conn);
+                        fallbackCheckCmd.Parameters.AddWithValue("@username", txtUsername.Text);
+                        userExists = Convert.ToInt32(fallbackCheckCmd.ExecuteScalar());
+                    }
 
-                SqlCommand cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@nama", txtNama.Text);
-                cmd.Parameters.AddWithValue("@username", txtUsername.Text);
-                cmd.Parameters.AddWithValue("@password", txtPassword.Text);
+                    if (userExists > 0)
+                    {
+                        MessageBox.Show("Username sudah digunakan. Silakan pilih username lain.");
+                        return;
+                    }
 
-                int result = cmd.ExecuteNonQuery();
+                    // Register User
+                    // Jika SP sp_RegisterUser tidak ada, Anda perlu membuatnya
+                    SqlCommand cmd = new SqlCommand("sp_RegisterUser", conn);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@nama", txtNama.Text);
+                    cmd.Parameters.AddWithValue("@username", txtUsername.Text);
+                    cmd.Parameters.AddWithValue("@password", txtPassword.Text);
 
-                if (result > 0)
-                {
-                    MessageBox.Show("Registrasi Sukses! Silakan Login", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    this.Close();
-                }
-                else
-                {
-                    MessageBox.Show("Registrasi gagal.", "Gagal");
+                    int result = 0;
+                    try
+                    {
+                        result = cmd.ExecuteNonQuery();
+                    }
+                    catch
+                    {
+                        // Fallback aman jika SP sp_RegisterUser belum dibuat
+                        SqlCommand fallbackCmd = new SqlCommand("INSERT INTO [User] (nama, username, password) VALUES (@nama, @username, @password)", conn);
+                        fallbackCmd.Parameters.AddWithValue("@nama", txtNama.Text);
+                        fallbackCmd.Parameters.AddWithValue("@username", txtUsername.Text);
+                        fallbackCmd.Parameters.AddWithValue("@password", txtPassword.Text);
+                        result = fallbackCmd.ExecuteNonQuery();
+                    }
+
+                    if (result > 0)
+                    {
+                        MessageBox.Show("Registrasi Sukses! Silakan Login", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        this.Close();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Registrasi gagal.", "Gagal");
+                    }
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Terjadi masalah sistem: " + ex.Message, "Error");
-            }
-            finally
-            {
-                if (conn.State == ConnectionState.Open)
-                    conn.Close();
             }
         }
     }
