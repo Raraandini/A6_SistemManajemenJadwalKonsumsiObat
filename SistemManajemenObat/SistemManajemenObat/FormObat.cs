@@ -8,8 +8,9 @@ namespace SistemManajemenObat
 {
     public partial class FormObat : Form
     {
+        private readonly string connectionString =
+            "Data Source=LAPTOP-Q1UQHI44\\MEILANULFIA;Initial Catalog=DBSistemManajemenObat;Integrated Security=True";
         private int selectedIdObat = -1;
-        private BindingSource bsObat = new BindingSource();
 
         public FormObat()
         {
@@ -19,17 +20,7 @@ namespace SistemManajemenObat
         private void FormObat_Load(object sender, EventArgs e)
         {
             txtIdObat.ReadOnly = true;
-            txtIdUser.ReadOnly = true;
-            txtIdUser.Text = Session.IdUser.ToString();
 
-            // Gunakan BindingNavigator yang sudah ada di Designer
-            bindingNavigator1.BindingSource = bsObat;
-            
-            // Sembunyikan tombol Add dan Delete bawaan agar user menggunakan tombol manual yang memanggil SP
-            bindingNavigatorAddNewItem.Visible = false;
-            bindingNavigatorDeleteItem.Visible = false;
-
-            // DataGridView setup
             dataGridView1.SelectionMode       = DataGridViewSelectionMode.FullRowSelect;
             dataGridView1.MultiSelect         = false;
             dataGridView1.ReadOnly            = true;
@@ -40,24 +31,12 @@ namespace SistemManajemenObat
             dataGridView1.BorderStyle         = System.Windows.Forms.BorderStyle.None;
             dataGridView1.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(167, 199, 231);
             dataGridView1.ColumnHeadersDefaultCellStyle.ForeColor = System.Drawing.Color.FromArgb(44, 62, 80);
-            dataGridView1.ColumnHeadersDefaultCellStyle.Font = new System.Drawing.Font("Segoe UI Semibold", 10F, System.Drawing.FontStyle.Bold);
+            dataGridView1.ColumnHeadersDefaultCellStyle.Font =
+                new System.Drawing.Font("Segoe UI Semibold", 10F, System.Drawing.FontStyle.Bold);
             dataGridView1.EnableHeadersVisualStyles = false;
 
-            // Panggil LoadData terlebih dahulu agar BindingSource mengetahui skema data (kolom-kolomnya)
-            LoadData();
-
-            // Menghubungkan TextBox secara langsung ke BindingSource (Native Data Binding)
-            txtIdObat.DataBindings.Clear();
-            txtIdObat.DataBindings.Add("Text", bsObat, "id_obat", true, DataSourceUpdateMode.Never);
-            
-            txtIdUser.DataBindings.Clear();
-            txtIdUser.DataBindings.Add("Text", bsObat, "id_user", true, DataSourceUpdateMode.Never);
-            
-            txtNamaObat.DataBindings.Clear();
-            txtNamaObat.DataBindings.Add("Text", bsObat, "nama_obat", true, DataSourceUpdateMode.Never);
-            
-            txtJumlahStok.DataBindings.Clear();
-            txtJumlahStok.DataBindings.Add("Text", bsObat, "jumlah_stok", true, DataSourceUpdateMode.Never);
+            dataGridView1.CellClick -= dataGridView1_CellClick;
+            dataGridView1.CellClick += dataGridView1_CellClick;
 
             btnLoad.Click   -= btnLoad_Click;
             btnLoad.Click   += btnLoad_Click;
@@ -72,34 +51,38 @@ namespace SistemManajemenObat
 
             txtSearch.KeyDown += (s, ev) =>
             { if (ev.KeyCode == Keys.Enter) btnSearch.PerformClick(); };
+
+            LoadData();
         }
 
         private void LoadData()
         {
             try
             {
-                using (SqlConnection conn = DatabaseHelper.GetConnection())
+                using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     conn.Open();
-                    // Menggunakan VIEW vw_Obat
-                    using (SqlCommand cmd = new SqlCommand("SELECT * FROM vw_Obat WHERE id_user=@id_user", conn))
+                    dataGridView1.Rows.Clear();
+                    dataGridView1.Columns.Clear();
+                    dataGridView1.Columns.Add("id_obat",    "ID Obat");
+                    dataGridView1.Columns.Add("id_user",    "ID User");
+                    dataGridView1.Columns.Add("nama_obat",  "Nama Obat");
+                    dataGridView1.Columns.Add("jumlah_stok","Jumlah Stok");
+                    dataGridView1.Columns["id_obat"].Visible = false;
+                    dataGridView1.Columns["id_user"].Visible = false;
+
+                    SqlCommand    cmd    = new SqlCommand("SELECT * FROM Obat", conn);
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
                     {
-                        cmd.Parameters.AddWithValue("@id_user", Session.IdUser);
-                        SqlDataAdapter da = new SqlDataAdapter(cmd);
-                        DataTable dt = new DataTable();
-                        da.Fill(dt);
-
-                        bsObat.DataSource = dt;
-                        dataGridView1.DataSource = bsObat;
-
-                        if (dataGridView1.Columns.Contains("id_obat"))
-                        {
-                            dataGridView1.Columns["id_obat"].Visible = false;
-                            dataGridView1.Columns["id_user"].Visible = false;
-                            dataGridView1.Columns["nama_obat"].HeaderText = "Nama Obat";
-                            dataGridView1.Columns["jumlah_stok"].HeaderText = "Jumlah Stok";
-                        }
+                        dataGridView1.Rows.Add(
+                            reader["id_obat"].ToString(),
+                            reader["id_user"].ToString(),
+                            reader["nama_obat"].ToString(),
+                            reader["jumlah_stok"].ToString()
+                        );
                     }
+                    reader.Close();
                 }
             }
             catch (Exception ex)
@@ -132,18 +115,16 @@ namespace SistemManajemenObat
             }
             try
             {
-                using (SqlConnection conn = DatabaseHelper.GetConnection())
+                using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     conn.Open();
-                    // Menggunakan Stored Procedure
-                    using (SqlCommand cmd = new SqlCommand("sp_InsertObat", conn))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@id_user",     Session.IdUser);
-                        cmd.Parameters.AddWithValue("@nama_obat",   txtNamaObat.Text.Trim());
-                        cmd.Parameters.AddWithValue("@jumlah_stok", stok);
-                        cmd.ExecuteNonQuery();
-                    }
+                    SqlCommand cmd = new SqlCommand(
+                        "INSERT INTO Obat (id_user, nama_obat, jumlah_stok) VALUES (@id_user, @nama_obat, @jumlah_stok)",
+                        conn);
+                    cmd.Parameters.AddWithValue("@id_user",     Session.IdUser);
+                    cmd.Parameters.AddWithValue("@nama_obat",   txtNamaObat.Text.Trim());
+                    cmd.Parameters.AddWithValue("@jumlah_stok", stok);
+                    cmd.ExecuteNonQuery();
                     MessageBox.Show("Data obat berhasil ditambahkan.", "Sukses",
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
                     ClearForm(); LoadData();
@@ -158,7 +139,7 @@ namespace SistemManajemenObat
 
         private void btnUpdate_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(txtIdObat.Text) || !int.TryParse(txtIdObat.Text, out int id_obat_update))
+            if (selectedIdObat == -1)
             {
                 MessageBox.Show("Pilih data obat dari tabel terlebih dahulu sebelum mengupdate.",
                     "Validasi", MessageBoxButtons.OK, MessageBoxIcon.Warning); return;
@@ -177,36 +158,31 @@ namespace SistemManajemenObat
             }
             try
             {
-                using (SqlConnection conn = DatabaseHelper.GetConnection())
+                using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     conn.Open();
-                    // Menggunakan Stored Procedure
-                    using (SqlCommand cmd = new SqlCommand("sp_UpdateObat", conn))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@id_obat",     id_obat_update);
-                        cmd.Parameters.AddWithValue("@id_user",     Session.IdUser);
-                        cmd.Parameters.AddWithValue("@nama_obat",   txtNamaObat.Text.Trim());
-                        cmd.Parameters.AddWithValue("@jumlah_stok", stok);
-                        
-                        cmd.ExecuteNonQuery();
-                        
-                        MessageBox.Show("Data obat berhasil diperbarui.", "Sukses",
-                            MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        ClearForm(); LoadData();
-                    }
+                    SqlCommand cmd = new SqlCommand(
+                        "UPDATE Obat SET nama_obat=@nama_obat, jumlah_stok=@jumlah_stok WHERE id_obat=@id_obat",
+                        conn);
+                    cmd.Parameters.AddWithValue("@nama_obat",   txtNamaObat.Text.Trim());
+                    cmd.Parameters.AddWithValue("@jumlah_stok", stok);
+                    cmd.Parameters.AddWithValue("@id_obat",     selectedIdObat);
+                    cmd.ExecuteNonQuery();
+                    MessageBox.Show("Data obat berhasil diperbarui.", "Sukses",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    ClearForm(); LoadData();
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Gagal mengupdate: " + ex.Message,
+                MessageBox.Show("Terjadi kesalahan saat Update: " + ex.Message,
                     "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private void btnDelete_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(txtIdObat.Text) || !int.TryParse(txtIdObat.Text, out int id_obat_delete))
+            if (selectedIdObat == -1)
             {
                 MessageBox.Show("Pilih data obat dari tabel terlebih dahulu sebelum menghapus.",
                     "Validasi", MessageBoxButtons.OK, MessageBoxIcon.Warning); return;
@@ -214,32 +190,23 @@ namespace SistemManajemenObat
             DialogResult konfirmasi = MessageBox.Show(
                 "Yakin ingin menghapus obat ini? Jadwal dan riwayat terkait juga akan terhapus.",
                 "Konfirmasi Hapus", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                
             if (konfirmasi != DialogResult.Yes) return;
-            
             try
             {
-                using (SqlConnection conn = DatabaseHelper.GetConnection())
+                using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     conn.Open();
-                    // Menggunakan Stored Procedure
-                    using (SqlCommand cmd = new SqlCommand("sp_DeleteObat", conn))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@id_obat", id_obat_delete);
-                        cmd.Parameters.AddWithValue("@id_user", Session.IdUser);
-                        
-                        cmd.ExecuteNonQuery();
-                        
-                        MessageBox.Show("Data obat berhasil dihapus.", "Sukses",
-                            MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        ClearForm(); LoadData();
-                    }
+                    SqlCommand cmd = new SqlCommand("DELETE FROM Obat WHERE id_obat=@id_obat", conn);
+                    cmd.Parameters.AddWithValue("@id_obat", selectedIdObat);
+                    cmd.ExecuteNonQuery();
+                    MessageBox.Show("Data obat berhasil dihapus.", "Sukses",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    ClearForm(); LoadData();
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Gagal menghapus: " + ex.Message,
+                MessageBox.Show("Terjadi kesalahan saat Delete: " + ex.Message,
                     "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -254,26 +221,35 @@ namespace SistemManajemenObat
             }
             try
             {
-                using (SqlConnection conn = DatabaseHelper.GetConnection())
+                using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     conn.Open();
-                    // Menggunakan Stored Procedure
-                    using (SqlCommand cmd = new SqlCommand("sp_SearchObat", conn))
+                    dataGridView1.Rows.Clear();
+                    dataGridView1.Columns.Clear();
+                    dataGridView1.Columns.Add("id_obat",    "ID Obat");
+                    dataGridView1.Columns.Add("id_user",    "ID User");
+                    dataGridView1.Columns.Add("nama_obat",  "Nama Obat");
+                    dataGridView1.Columns.Add("jumlah_stok","Jumlah Stok");
+                    dataGridView1.Columns["id_obat"].Visible = false;
+                    dataGridView1.Columns["id_user"].Visible = false;
+
+                    SqlCommand cmd = new SqlCommand(
+                        "SELECT * FROM Obat WHERE nama_obat LIKE @keyword", conn);
+                    cmd.Parameters.AddWithValue("@keyword", "%" + txtSearch.Text.Trim() + "%");
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
                     {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@keyword", txtSearch.Text.Trim());
-                        cmd.Parameters.AddWithValue("@id_user", Session.IdUser);
-                        
-                        SqlDataAdapter da = new SqlDataAdapter(cmd);
-                        DataTable dt = new DataTable();
-                        da.Fill(dt);
-
-                        bsObat.DataSource = dt;
-
-                        if (dt.Rows.Count == 0)
-                            MessageBox.Show("Obat \"" + txtSearch.Text + "\" tidak ditemukan.",
-                                "Pencarian", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        dataGridView1.Rows.Add(
+                            reader["id_obat"].ToString(),
+                            reader["id_user"].ToString(),
+                            reader["nama_obat"].ToString(),
+                            reader["jumlah_stok"].ToString()
+                        );
                     }
+                    reader.Close();
+                    if (dataGridView1.Rows.Count == 0)
+                        MessageBox.Show("Obat \"" + txtSearch.Text + "\" tidak ditemukan.",
+                            "Pencarian", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
             catch (Exception ex)
@@ -283,23 +259,23 @@ namespace SistemManajemenObat
             }
         }
 
-        // CellClick tetap dibiarkan kosong karena sudah menggunakan bsObat.CurrentChanged
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            // Tidak melakukan apa-apa, handled by BindingSource CurrentChanged
+            if (e.RowIndex < 0) return;
+            DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
+            selectedIdObat     = Convert.ToInt32(row.Cells["id_obat"].Value);
+            txtIdObat.Text     = row.Cells["id_obat"].Value?.ToString();
+            txtIdUser.Text     = row.Cells["id_user"].Value?.ToString();
+            txtNamaObat.Text   = row.Cells["nama_obat"].Value?.ToString();
+            txtJumlahStok.Text = row.Cells["jumlah_stok"].Value?.ToString();
         }
 
         private void ClearForm()
         {
             selectedIdObat = -1;
-            txtIdObat.Clear(); 
-            txtIdUser.Text = Session.IdUser.ToString();
+            txtIdObat.Clear(); txtIdUser.Clear();
             txtNamaObat.Clear(); txtJumlahStok.Clear();
             txtSearch.Clear();
-            
-            // Lepas seleksi BindingSource agar DataGridView tidak highlight apa pun
-            // jika ClearForm dipanggil eksplisit untuk menambah data baru
-            bsObat.Position = -1;
         }
     }
 }

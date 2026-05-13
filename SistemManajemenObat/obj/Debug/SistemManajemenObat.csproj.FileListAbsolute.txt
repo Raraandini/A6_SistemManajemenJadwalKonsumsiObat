@@ -1,9 +1,13 @@
-C:\SEMESTER 4\pabd\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\bin\Debug\SistemManajemenObat.exe.config
-C:\SEMESTER 4\pabd\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\bin\Debug\SistemManajemenObat.exe
-C:\SEMESTER 4\pabd\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\bin\Debug\SistemManajemenObat.pdb
-C:\SEMESTER 4\pabd\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\obj\Debug\SistemManajemenObat.csproj.AssemblyReference.cache
-C:\SEMESTER 4\pabd\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\obj\Debug\SistemManajemenObat.Properties.Resources.resources
-C:\SEMESTER 4\pabd\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\obj\Debug\SistemManajemenObat.csproj.GenerateResource.cache
-C:\SEMESTER 4\pabd\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\obj\Debug\SistemManajemenObat.csproj.CoreCompileInputs.cache
-C:\SEMESTER 4\pabd\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\obj\Debug\SistemManajemenObat.exe
-C:\SEMESTER 4\pabd\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\obj\Debug\SistemManajemenObat.pdb
+D:\Semester4\PABD\ProjekUCP1\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\bin\Debug\SistemManajemenObat.exe.config
+D:\Semester4\PABD\ProjekUCP1\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\bin\Debug\SistemManajemenObat.exe
+D:\Semester4\PABD\ProjekUCP1\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\bin\Debug\SistemManajemenObat.pdb
+D:\Semester4\PABD\ProjekUCP1\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\obj\Debug\SistemManajemenObat.csproj.AssemblyReference.cache
+D:\Semester4\PABD\ProjekUCP1\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\obj\Debug\SistemManajemenObat.FormJadwalKonsumsi.resources
+D:\Semester4\PABD\ProjekUCP1\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\obj\Debug\SistemManajemenObat.FormObat.resources
+D:\Semester4\PABD\ProjekUCP1\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\obj\Debug\SistemManajemenObat.FormRiwayatKonsumsi.resources
+D:\Semester4\PABD\ProjekUCP1\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\obj\Debug\SistemManajemenObat.Properties.Resources.resources
+D:\Semester4\PABD\ProjekUCP1\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\obj\Debug\SistemManajemenObat.csproj.GenerateResource.cache
+D:\Semester4\PABD\ProjekUCP1\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\obj\Debug\SistemManajemenObat.csproj.CoreCompileInputs.cache
+D:\Semester4\PABD\ProjekUCP1\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\obj\Debug\SistemManajemenObat.exe
+D:\Semester4\PABD\ProjekUCP1\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\obj\Debug\SistemManajemenObat.pdb
+D:\Semester4\PABD\ProjekUCP1\ProjekUCP1\SistemManajemenObat\SistemManajemenObat\obj\Debug\SistemManajemenObat.Form1.resources

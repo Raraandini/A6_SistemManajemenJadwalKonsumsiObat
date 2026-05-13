@@ -7,6 +7,9 @@ namespace SistemManajemenObat
 {
     public partial class FormLogin : Form
     {
+        private readonly string connectionString =
+            "Data Source=LAPTOP-Q1UQHI44\\MEILANULFIA;Initial Catalog=DBSistemManajemenObat;Integrated Security=True";
+
         public FormLogin()
         {
             InitializeComponent();
@@ -22,7 +25,7 @@ namespace SistemManajemenObat
         {
             try
             {
-                using (SqlConnection conn = DatabaseHelper.GetConnection())
+                using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     conn.Open();
                     MessageBox.Show("Koneksi berhasil terhubung dengan Database!",
@@ -46,35 +49,30 @@ namespace SistemManajemenObat
             }
             try
             {
-                using (SqlConnection conn = DatabaseHelper.GetConnection())
+                using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     conn.Open();
-                    // PERINGATAN: Sengaja dibuat rentan terhadap SQL Injection untuk pembelajaran
-                    string query = "SELECT id_user, nama FROM [User] WHERE username='" + txtUsername.Text + "' AND password='" + txtPassword.Text + "'";
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    string query = "SELECT id_user, nama FROM [User] WHERE username=@usr AND password=@pwd";
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@usr", txtUsername.Text);
+                    cmd.Parameters.AddWithValue("@pwd", txtPassword.Text);
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    if (reader.HasRows)
                     {
-                        using (SqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            if (reader.HasRows)
-                            {
-                                reader.Read();
-                                string nama = reader["nama"].ToString();
-                                int idUser = Convert.ToInt32(reader["id_user"]);
-                                
-                                Session.IdUser = idUser;
-                                Session.NamaUser = nama;
-                                
-                                MessageBox.Show($"Selamat Datang, {nama}!", "Login Berhasil");
-                                Form1 dashboard = new Form1();
-                                this.Hide();
-                                dashboard.Show();
-                            }
-                            else
-                            {
-                                MessageBox.Show("Username atau Password salah!", "Login Gagal",
-                                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            }
-                        }
+                        reader.Read();
+                        string nama   = reader["nama"].ToString();
+                        int    idUser = Convert.ToInt32(reader["id_user"]);
+                        Session.IdUser   = idUser;
+                        Session.NamaUser = nama;
+                        MessageBox.Show($"Selamat Datang, {nama}!", "Login Berhasil");
+                        Form1 dashboard = new Form1();
+                        this.Hide();
+                        dashboard.Show();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Username atau Password salah!", "Login Gagal",
+                            MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
             }
