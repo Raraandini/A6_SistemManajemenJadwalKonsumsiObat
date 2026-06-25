@@ -1,0 +1,51 @@
+namespace SistemManajemenObat
+{
+    partial class FormCetakObat
+    {
+        private System.ComponentModel.IContainer components = null;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        private void InitializeComponent()
+        {
+            this.crViewer = new CrystalDecisions.Windows.Forms.CrystalReportViewer();
+            this.SuspendLayout();
+            // 
+            // crViewer
+            // 
+            this.crViewer.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.crViewer.Cursor = System.Windows.Forms.Cursors.Default;
+            this.crViewer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.crViewer.Location = new System.Drawing.Point(0, 0);
+            this.crViewer.Name = "crViewer";
+            this.crViewer.Size = new System.Drawing.Size(800, 600);
+            this.crViewer.TabIndex = 0;
+            // 
+            // FormCetakObat
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(800, 600);
+            this.Controls.Add(this.crViewer);
+            this.Name = "FormCetakObat";
+            this.Text = "Cetak Laporan Obat";
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
+            this.Load += new System.EventHandler(this.FormCetakObat_Load);
+            this.ResumeLayout(false);
+
+        }
+
+        #endregion
+
+        private CrystalDecisions.Windows.Forms.CrystalReportViewer crViewer;
+    }
+}

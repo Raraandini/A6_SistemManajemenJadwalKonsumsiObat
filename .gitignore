@@ -1,0 +1,33 @@
+# Visual Studio
+.vs/
+[Bb]in/
+[Oo]bj/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]uild/
+bld/
+[Ll]og/
+[Ll]ogs/
+
+# NuGet
+packages/
+*.nupkg
+
+# Temporary files
+*.tmp
+*.bak
+*.cache
+*.swp
+*.*~
+
+# OS generated files
+.DS_Store
+Thumbs.db
